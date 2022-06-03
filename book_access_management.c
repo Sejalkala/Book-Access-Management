@@ -10,16 +10,17 @@ Assumptions
 1. name of book,student is of a single word.
 2. in every month there are 30 days.
 */
-struct book_list
+struct book_DB
 {
     /* data */
+    int book_id;
     char Title[50];
     char author[50];
     char subject[50];
     int number_of_copies_issued;
     int number_of_copies_available;
-    struct book_list *next;
-    struct book_list *prev;
+    struct book_DB *right;
+    struct book_DB *left;
 };
 struct request_queue
 {
@@ -38,87 +39,82 @@ struct borrower_list
     struct borrower_list *prev;
 };
 
-
-//head of the three linked lists
-struct book_list *head_book_list=NULL;
+struct book_DB *root=NULL;
 struct request_queue *head_request_queue=NULL;
 struct borrower_list *head_borrower_list=NULL;
 
 
 //supporting functions
-int book_list_by_name(char arr[50],struct request_queue *head_request_queue); //returns no of occurances of a given name in request_queue
-int no_bo_list_by_name(char arr[50],struct borrower_list *head_borrower_list);//returns no of occurances of a given name in borrower_list
-int no_re_queue(char arr[50],struct request_queue *head_request_queue);//no of occurances of a given title in request_queue
-int no_bo_list(char arr[50],struct borrower_list *head_borrower_list);//no of occurances of a given title in boroweer_list
-void make_available(char arr[50],struct book_list* *head_book_list);//if a book is returned,this functions make sure that the book is now available
-void print_book_list(struct book_list *head_book_list);//prints the book_list
-void print_request_queue(struct request_queue *head_request_queue);//prints request_queue
-void print_borrower_list(struct borrower_list *head_borrower_list);//prints borrower_list
+int no_bo_list(char arr[50],struct borrower_list *head_borrower_list);//no of occurances of a given name in boroweer_list
+int count_request(char arr_name[50],char arr_title[50],struct request_queue *head_request_queue);//no of occurances in request_queue
+int totalCopies(struct book_DB *root);// calculates total number of available copies
 int no_of_days(int d1[3],int d2[3]);//calculates the no of days between the two given dates
-int isDefaulter(char arr[50],struct borrower_list *head_borrower_list);//checks if the given name is defaulter or not
-int isBook_available(char arr[50],struct book_list *head_book_list);//checks if the book with given title is available or not
-int willget_theBook(char arr[50],struct borrower_list *head_borrower_list);//no of occurances in borrower list
-int count_request(char arr_name[50],char arr_title[50],struct request_queue *head_request_queue);////no of occurances in request_queue
+int isBook_available(char arr[50],struct book_DB *root,int flag);//checks if the book with given title is available or not
+int no_re_queue(char arr[50],struct request_queue *head_request_queue);//no of occurances of a given title in request_queue
+int no_list(char arr[50],struct borrower_list *head_borrower_list);//no of occurances of a given name in boroweer_list
+void printInorder(struct book_DB *r);//prints the tree by inorder traversal
+int idfromTitle(char title[50],struct book_DB *root);// returns id of the book
+void bookIssued(int id,struct book_DB *root);//issues the book
+int no_bo_list_by_name(char arr[50],struct borrower_list *head_borrower_list);//returns no of occurances of a given name in borrower_list
+void make_available(int id,struct book_DB *root);//if a book is returned,this functions make sure that the book is now available
 
+//funtions to insert node in the book_DB tree
+struct book_DB *newNode(int book_id,char arr_title[50],char arr_author[50],char arr_subject[50]);
+int height(struct book_DB *root);
+int getBalanceFactor(struct book_DB *root);
+struct book_DB *rightRotate(struct book_DB *y);
+struct book_DB *leftRotate(struct book_DB *x);
+struct book_DB *insert(struct book_DB *new_node,struct book_DB *root);
 
-//merge sort supporting functions
-struct book_list *split(struct book_list *head);
-struct book_list *merge(struct book_list *first, struct book_list *second);
-
-
-//function to insert nodes in linked lists
-void insert_book_list(char arr_title[50],char arr_author[50],char arr_subject[50],struct book_list* *head_book_list);
-void insert_request_queue(struct request_queue* *head_request_queue);
-void insert_borrower_list(struct borrower_list* *head_borrower_list,struct request_queue* *head_request_queue);
-void return_book(struct borrower_list* *head_borrower_list,struct book_list* *head_book_list);
-
+// functions to insert nodes in linked lists request_queue and borrower list
+struct request_queue* insert_request_queue(struct request_queue* *head_request_queue);
+void insert_borrower_list(struct borrower_list* *head_borrower_list,struct request_queue* *head_request_queue,struct book_DB *root);
+void return_book(struct borrower_list* *head_borrower_list,struct book_DB *root);
 
 //main functions
-//Question 1
+//question 1
 void Display_names(struct request_queue *head_request_queue,struct borrower_list *head_borrower_list);
-//Question 2
-void Book_in_mostDemand(struct book_list *head_book_list);
-//Question 3
-void No_ofBooks_givenin_3Days(struct book_list *head_book_list,struct borrower_list *head_borrower_list);
-//Question 4
+//question 2
+int Book_in_mostDemand(struct book_DB *root,int max,struct borrower_list *head_borrower_list,struct request_queue *head_request_queue);
+void question_2(struct book_DB *root,int max);
+//question 3
+void No_ofBooks_givenin_3Days(struct book_DB *root,struct borrower_list *head_borrower_list);
+//question 4
 void Sort_borrower_list(struct borrower_list *head_borrower_list);
-//Question 5
-struct book_list *mergeSort(struct book_list *head);
-//Question 6
-void DisplayDefaulter(struct request_queue* *head_request_queue);
-//Question 7
-void Display_students(struct borrower_list *head_borrower_list,struct request_queue *head_request_queue);
-//Question 8
-void Display_requested_books(struct request_queue *head_request_queue,struct book_list *head_book_list);
-//Question 9
-void Display_title(struct book_list *head_book_list,struct request_queue *head_request_queue,struct borrower_list *head_borrower_list);
-//Question 10
-void Students_withMaxNo_ofBooks(struct request_queue *head_request_queue);
+//question 5
+void sortNdisplay(struct book_DB *root,char abcd[50]);
+//question 6
+void Display_requested_books(struct request_queue *head_request_queue,struct book_DB *root);
+//question 7
+void Display_title(struct book_DB *root,struct request_queue *head_request_queue,struct borrower_list *head_borrower_list);
+//question 8
+void DisplayFrom_to(struct book_DB *root,int b1,int b2);
+
 
 int main()
 {
-    printf("\n                    WELCOME                    \n");
-    printf("\n                      TO                       \n");
-    printf("\n                    SEJAL'S                    \n");
-    printf("\n            BOOK ACCESS MANAGEMENT SYSTEM      \n");
+    printf("\n                                   WELCOME                               \n");
+    printf("\n                                     TO                                  \n");
+    printf("\n                                   SEJAL'S                               \n");
+    printf("\n                           BOOK ACCESS MANAGEMENT SYSTEM                 \n");
 
     printf("\n We have following list of books \n");
-    printf("\nNAME  AUTHOR  SUBJECT  AVAILABLE_COPIES ISSUED_COPIES \n");
-    insert_book_list("atomic","gina","motivational",&head_book_list);
-    insert_book_list("space","john","scifi",&head_book_list);
-    insert_book_list("kalam","ross","biography",&head_book_list);
-    insert_book_list("happiness","neha","motivational",&head_book_list);
-    insert_book_list("courage","rachel","motivational",&head_book_list);
-    insert_book_list("earth","monica","scifi",&head_book_list);
-    insert_book_list("life","chandler","motivational",&head_book_list);
-    insert_book_list("family","lisa","biography",&head_book_list);
-    insert_book_list("emily","sejal","biography",&head_book_list);
-    insert_book_list("success","simran","motivational",&head_book_list);
-    print_book_list(head_book_list);
+    printf("\n title of the book and number of copies available: \n");
+    root=insert(newNode(15,"atomic","gina","motivational"),root);
+    root=insert(newNode(20,"space","john","scifi"),root);
+    root=insert(newNode(5,"kalam","ross","biography"),root);
+    root=insert(newNode(30,"happiness","neha","motivational"),root);
+    root=insert(newNode(25,"courage","rachel","motivational"),root);
+    root=insert(newNode(35,"earth","monica","scifi"),root);
+    root=insert(newNode(40,"life","chandler","motivational"),root);
+    root=insert(newNode(23,"family","lisa","biography"),root);
+    root=insert(newNode(6,"emily","sejal","biography"),root);
+    root=insert(newNode(8,"success","simran","motivational"),root);
+    printInorder(root);
+   
     int flag_1=1;
     while(flag_1>0)
-    {
-         
+    { 
         printf("\n1. Request a book\n");
         printf("\n2. Return book\n");
         printf("\n3. Insert directly in request_queue\n");
@@ -126,22 +122,23 @@ int main()
         scanf("%d",&n);
         if(n==1)
         {
-            insert_borrower_list(&head_borrower_list,&head_request_queue);
+            insert_borrower_list(&head_borrower_list,&head_request_queue,root);
+            printInorder(root);
         }
         else if(n==2)
         {
-            return_book(&head_borrower_list,&head_book_list);
+            return_book(&head_borrower_list,root);
+            printInorder(root);
         }
         else if(n==3)
         {
-            insert_request_queue(&head_request_queue);
+            head_request_queue=insert_request_queue(&head_request_queue);
         }
+        
         printf("\nEnter 0 to get out of this loop and 1 to continue\n");
         scanf("%d",&flag_1);
         printf("\n");
       }
-    printf("\n updated book list \n");
-    print_book_list(head_book_list);
     int flag_2=1;
     while(flag_2>0)
     {
@@ -152,11 +149,10 @@ int main()
         printf("\n3.Within first 3 days how many books can be given to the students\n");
         printf("\n4.Sort the borrower_list according to the number of books issued in descending order.\n");
         printf("\n5.Sort and display the title and authors name for all books of a particular subject on the basis of number_of_copies_available.\n");
-        printf("\n6.Remove the defaulters from the request_queue and insert them into a new list named as defaulter_list. Display the defaulter_list.\n");
-        printf("\n7.Display the names of the students who have already borrowed books and are asking for other books.\n");
-        printf("\n8.Display the names of the requested books whose copies are available.\n");
-        printf("\n9.Display the title of all the books which have not been issued by anyone.\n");
-        printf("\n10.Display the name of the student/s who has requested for the maximum number of books\n");
+        printf("\n6.Display the names of the requested books whose copies are available.\n");
+        printf("\n7.Display the title of all the books which have not been issued by anyone.\n");
+        printf("\n8.Given From-Book-ID and To-Book-ID, display all books with their IDs in the range defined by From-Book-ID and To-Book-ID.\n");
+
         scanf("%d",&option);
         switch(option)
         {
@@ -167,48 +163,48 @@ int main()
             }
             case 2:
             {
-                Book_in_mostDemand(head_book_list);
+                int max=Book_in_mostDemand(root,0,head_borrower_list,head_request_queue);
+                question_2(root,max);
                 break;
             }
             case 3:
             {
-                No_ofBooks_givenin_3Days(head_book_list,head_borrower_list);
+                No_ofBooks_givenin_3Days(root,head_borrower_list);
                 break;
             }
-            case 4://pending
+            case 4:
             {
                 Sort_borrower_list(head_borrower_list);
                 break;
             }
             case 5:
             {
-                head_book_list= mergeSort(head_book_list);
-                print_book_list(head_book_list);
+                printf("\n enter one of the subjects given for sorting: \n");
+                printf("\n subjects are: motivational,scifi,biography\n");
+                char abcd[50];
+                scanf("%s",&abcd);
+                sortNdisplay(root,abcd);
                 break; 
             }
             case 6:
             {
-                DisplayDefaulter(&head_request_queue);
+                Display_requested_books(head_request_queue,root);
                 break;
             }
             case 7:
             {
-                Display_students(head_borrower_list,head_request_queue);
+                Display_title(root,head_request_queue,head_borrower_list);
                 break;
             }
             case 8:
             {
-                Display_requested_books(head_request_queue,head_book_list);
-                break;
-            }
-            case 9:
-            {
-                Display_title(head_book_list,head_request_queue,head_borrower_list);
-                break;
-            }
-            case 10:
-            {
-                Students_withMaxNo_ofBooks(head_request_queue);
+                printf("\n enter the book-id 'from' which you want the books to display: \n");
+                int b1;
+                scanf("%d",&b1);
+                printf("\n enter the book-id 'to' which you want the books to display: \n");
+                int b2;
+                scanf("%d",&b2);
+                DisplayFrom_to(root,b1,b2);
                 break;
             }
             default:
@@ -217,23 +213,23 @@ int main()
                 break;
             }
         }
-
         scanf("%d",&flag_2);
     }
+    
     printf("\n                                                 HAPPY READING!                                                 \n");
     printf("\n                                           THANK YOU -BT20CSE057,SEJAL KALA                                      \n");
+    
     return 0;
 }
 
-
-/*************************************************************************************************/
-//Question 1
+//question 1
 void Display_names(struct request_queue *head_request_queue,struct borrower_list *head_borrower_list)
 {
+    printf("\n names of students: \n");
     struct request_queue *temp=head_request_queue;
     while(temp!=NULL)
     {
-        int a=willget_theBook(temp->Name_of_the_student,head_borrower_list);
+        int a=no_bo_list(temp->Name_of_the_student,head_borrower_list);
         int b=count_request(temp->Name_of_the_student,temp->title_of_the_book_asking_for,head_request_queue);
         if(a+b<4)
         {
@@ -242,219 +238,263 @@ void Display_names(struct request_queue *head_request_queue,struct borrower_list
         temp=temp->next;
     }
 }
-//Question 2
-void Book_in_mostDemand(struct book_list *head_book_list)
+//question 2
+char arr_2[50];
+int Book_in_mostDemand(struct book_DB *root,int max,struct borrower_list *head_borrower_list,struct request_queue *head_request_queue)
 {
-    char arr[50];
-    struct book_list *temp=head_book_list;
-    int max=0;
-    while(temp!=NULL)
+    if(root==NULL)
+     {
+       return max;
+     }
+    if(root!=NULL)
     {
-        int a=no_re_queue(temp->Title,head_request_queue);
-        int b=no_bo_list(temp->Title,head_borrower_list);
+        int a=no_re_queue(root->Title,head_request_queue);
+        int b=no_list(root->Title,head_borrower_list);
         if(max<a+b)
         {
-            strcpy(arr,temp->Title);
+            strcpy(arr_2,root->Title);
             max=a+b;
         }
-        temp=temp->next;
     }
+    max=Book_in_mostDemand(root->left,max,head_borrower_list,head_request_queue);  
+    max=Book_in_mostDemand(root->right,max,head_borrower_list,head_request_queue);
+    return max;
+}
+void question_2(struct book_DB *root,int max)
+{
     if(max==0)
     {
-        printf("\n Not a specific book\n");
+      printf("\n Not a specific book\n");
     }
     else
     {
-        printf("\nThe book with most demand is %s \n",arr);
-    }
+      printf("\nThe book with most demand is %s \n",arr_2);
+   }
 }
-//Question 3
-void No_ofBooks_givenin_3Days(struct book_list *head_book_list,struct borrower_list *head_borrower_list)
+//question 3
+int a_3;
+void No_ofBooks_givenin_3Days(struct book_DB *root,struct borrower_list *head_borrower_list)
 {
-    struct book_list *temp=head_book_list;
-    int a=0;
-    while(temp!=NULL)
+  printf("\n enter the present date:");
+  int date[3];
+  for(int i=0;i<3;i++)
+  {
+    scanf("%d",&date[i]);
+  }
+  int a=totalCopies(root);
+  struct borrower_list *t=head_borrower_list;
+  while(t!=NULL)
+  {
+    if(t->date_of_return[0]=='\0')
     {
-        a=a+temp->number_of_copies_available;
-        temp=temp->next;
+      int i;
+      for(i=0;i<3;i++)
+      {   
+        int b=no_of_days(t->date_of_issue,date);
+        if(b+3<15)
+        {
+          a++;
+        }
+      }
     }
-    struct borrower_list *t=head_borrower_list;
-    while(t!=NULL)
+    else
     {
-        if(t->date_of_return[0]=='\0')
-        {
-            printf("\n enter the present date:");
-            int date[3];
-            int i;
-            for(i=0;i<3;i++)
-            {
-                scanf("%d",&date[i]);
-                int b=no_of_days(t->date_of_issue,date);
-                if(b+3<15)
-                {
-                    a++;
-                }
-            }
-        }
-        else
-        {
-            a++;
-        }
-        t=t->next;
+      a++;
     }
-    printf("\n no of books : %d",a);
+    t=t->next;
+  }
+  printf("\n no of books : %d",a);
 }
-//Question 4
+//question 4
 void Sort_borrower_list(struct borrower_list *head_borrower_list)
 {
     struct borrower_list *temp=head_borrower_list;
     while(temp!=NULL)
     {
-        printf("\n name of student:%s nmae of book:%s\n ",temp->Name_of_the_student,temp->title_of_the_book);
+        printf("\n name of student:%s name of book:%s\n ",temp->Name_of_the_student,temp->title_of_the_book);
         temp=temp->next;
     }
 }
-
-//Question 5
-
-struct book_list *mergeSort(struct book_list *head)
+//question 5
+void sortNdisplay(struct book_DB *root,char abcd[50])
 {
-
-	if (!head || !head->next)
-		return head;
-	struct book_list *second = split(head);
-
-	// Recur for left and right halves
-	head = mergeSort(head);
-	second = mergeSort(second);
-
-	// Merge the two sorted halves
-	return merge(head,second);
+  if(root==NULL)
+  {
+    return;
+  }
+  if(strcmp(root->subject,abcd)==0)
+  {
+    printf("\n title:%s author:%s \n",root->Title,root->author);
+  }
+  sortNdisplay(root->left,abcd);
+  sortNdisplay(root->right,abcd);
 }
-//Question 6
-void DisplayDefaulter(struct request_queue* *head_request_queue)
-{
-    struct request_queue *temp=*head_request_queue;
-    while(temp!=NULL)
-    {
-        if(isDefaulter(temp->Name_of_the_student,head_borrower_list)==1)
-        {
-            printf("\n%s\n",temp->Name_of_the_student);
-            temp->prev->next=temp->next;
-            temp->next->prev=temp->prev;
-            struct request_queue *r=temp->next;
-            free(temp);
-            temp=r;
-        }
-        else
-        {
-            temp=temp->next;
-        }
-    }
-}
-//Question 7
-void Display_students(struct borrower_list *head_borrower_list,struct request_queue *head_request_queue)
+//question 6
+void Display_requested_books(struct request_queue *head_request_queue,struct book_DB *root)
 {
     struct request_queue *temp=head_request_queue;
     while(temp!=NULL)
     {
-        if(no_bo_list_by_name(temp->Name_of_the_student,head_borrower_list)>0)
+        if(isBook_available(temp->title_of_the_book_asking_for,root,0)==1)
         {
-            printf("\n %s \n",temp->Name_of_the_student);
+          printf("\n%s\n",temp->title_of_the_book_asking_for);
         }
         temp=temp->next;
     }
 }
-//Question 8
-void Display_requested_books(struct request_queue *head_request_queue,struct book_list *head_book_list)
+//question 7
+void Display_title(struct book_DB *root,struct request_queue *head_request_queue,struct borrower_list *head_borrower_list)
 {
-    struct request_queue *temp=head_request_queue;
-    while(temp!=NULL)
+  
+  if(root!=NULL)
     {
-        if(isBook_available(temp->title_of_the_book_asking_for,head_book_list)==1)
+        if(no_list(root->Title,head_borrower_list)==0 && no_re_queue(root->Title,head_request_queue)==0)
         {
-             printf("\n%s\n",temp->title_of_the_book_asking_for);
+            printf("\n %s \n",root->Title);
         }
-        temp=temp->next;
+        Display_title(root->left,head_request_queue,head_borrower_list);
+        Display_title(root->right,head_request_queue,head_borrower_list);
     }
 }
-//Question 9
-void Display_title(struct book_list *head_book_list,struct request_queue *head_request_queue,struct borrower_list *head_borrower_list)
+//question 8
+void DisplayFrom_to(struct book_DB *root,int b1,int b2)
 {
-    struct book_list *temp=head_book_list;
-    while(temp!=NULL)
+    if(root == NULL)
     {
-        if(no_bo_list(temp->Title,head_borrower_list)==0 && no_re_queue(temp->Title,head_request_queue)==0)
-        {
-            printf("\n %s \n",temp->Title);
-        }
-        temp=temp->next;
+      return;
     }
-}
-//Question 10
-void Students_withMaxNo_ofBooks(struct request_queue *head_request_queue)
-{
-    int max=0;
-    struct request_queue *temp=head_request_queue;
-    while(temp!=NULL)
+    DisplayFrom_to(root->left,b1,b2);
+    if(root->book_id>=b1 && root->book_id<=b2)
     {
-        int a=book_list_by_name(temp->Name_of_the_student,head_request_queue);
-        if(a>max)
-        {
-            max=a;
-        }
-        temp=temp->next;  
+      printf("\n%s   %d\n",root->Title,root->book_id);
     }
-    struct request_queue *t=head_request_queue;
-    while(t!=NULL)
-    {
-        if(book_list_by_name(t->Name_of_the_student,head_request_queue)==max)
-        {
-            printf("\n %s \n",t->Name_of_the_student);
-            break;
-        }
-        t=t->next;
-    } 
+    DisplayFrom_to(root->right,b1,b2); 
 }
-/*************************************************************************************/
 
-/******************************************************************************************/
-void insert_book_list(char arr_title[50],char arr_author[50],char arr_subject[50],struct book_list* *head_book_list) 
+//insert functions
+struct book_DB *newNode(int book_id,char arr_title[50],char arr_author[50],char arr_subject[50]) 
 {
-    struct book_list *node_to_insert=(struct book_list* ) malloc(sizeof(struct book_list));    
-    strcpy(node_to_insert->Title,arr_title);
-    strcpy(node_to_insert->author,arr_author);
-    strcpy(node_to_insert->subject,arr_subject);
-    node_to_insert->number_of_copies_available=10;
-    node_to_insert->number_of_copies_issued=0;
-    
-    struct book_list *temp=*head_book_list;
-      
-    //insert node_to_insert to book_list
-    if(*head_book_list==NULL)// book_list is empty
-    {   
-        *head_book_list=node_to_insert;
+  struct book_DB *node = (struct book_DB *)malloc(sizeof(struct book_DB));
+  node->book_id = book_id;
+  node->left = NULL;
+  node->right = NULL;
+  strcpy(node->Title,arr_title);
+  strcpy(node->author,arr_author);
+  strcpy(node->subject,arr_subject);
+  node->number_of_copies_available=10;
+  node->number_of_copies_issued=0;
+  return node;
+}
+int height(struct book_DB *root)
+{
+  if(root==NULL)
+  {
+    return -1;
+  }
+  else
+  {
+    int left_h=height(root->left);
+    int right_h=height(root->right);
+
+    if(left_h > right_h)
+    {
+      return (left_h+1);
     }
     else
-    {    
-        while(temp->next!=NULL)
-        {
-            temp=temp->next;
-        }
-        temp->next=node_to_insert;
-        node_to_insert->prev=temp;
-        node_to_insert->next=NULL;
+    {
+      return (right_h + 1);
     }
-   
+  }
 }
+
+int getBalanceFactor(struct book_DB *root)
+{
+  if(root==NULL)
+  {
+    return -1;
+  }
+  return height(root->left) - height(root->right);
+}
+
+struct book_DB* rightRotate(struct book_DB *y)
+{
+  struct book_DB *x=y->left;
+  struct book_DB *T2=x->right;
+
+  x->right=y;
+  y->left=T2;
+  return x;
+}
+
+struct book_DB* leftRotate(struct book_DB *x)
+{
+  struct book_DB *y=x->right;
+  struct book_DB *T2=y->left;
+
+  y->left=x;
+  x->right=T2;
+  return y;
+}
+
+
+struct book_DB* insert(struct book_DB *new_node,struct book_DB *root)
+{
+  if(root==NULL)
+  {
+    root=new_node;
+   // printf("\n Value inserted successfully\n");
+    return root;
+  }
+  if(new_node->book_id < root->book_id)
+  {
+    root->left=insert(new_node,root->left);
+  }
+  else if(new_node->book_id >root->book_id)
+  {
+    root->right=insert(new_node,root->right);
+  }
+  else
+  {
+    printf("\n No duplicate values allowed!\n");
+    return root;
+  }
+  int bf=getBalanceFactor(root);
+  //left left case
+  if(bf >1 && new_node->book_id < root->left->book_id)
+  {
+    return rightRotate(root);
+  }
+  //right right case
+  if(bf<-1 && new_node->book_id > root->right->book_id)
+  {
+    return leftRotate(root);
+  }
+  //left right case
+  if(bf>1 && new_node->book_id>root->left->book_id)
+  {
+    root->left=leftRotate(root->left);
+    return rightRotate(root);
+  }
+  //right left case
+  if(bf<-1 && new_node->book_id<root->right->book_id)
+  {
+    root->right=rightRotate(root->right);
+    return leftRotate(root);
+  }
+  return root;
+}
+
+
 //function to request a book,i.e.,add a node in the request_queue
-void insert_request_queue(struct request_queue* *head_request_queue)
+struct request_queue* insert_request_queue(struct request_queue* *head_request_queue)
 {
     struct request_queue *node_to_insert=(struct request_queue* ) malloc(sizeof(struct request_queue*));
     printf("\nEnter your name\n");//name of the student
     scanf("%s",&node_to_insert->Name_of_the_student);
     printf("\nEnter the Title of the book you are asking for\n");
     scanf("%s",&node_to_insert->title_of_the_book_asking_for);
+    node_to_insert->next=NULL;
+    node_to_insert->prev=NULL;
     struct request_queue *temp=*head_request_queue;
     if(*head_request_queue==NULL)
     {
@@ -470,22 +510,31 @@ void insert_request_queue(struct request_queue* *head_request_queue)
         node_to_insert->prev=temp;
         node_to_insert->next=NULL;
     }
+    return *head_request_queue;
 }
 
 //insert node in borrower list
-void insert_borrower_list(struct borrower_list* *head_borrower_list,struct request_queue* *head_request_queue)
+void insert_borrower_list(struct borrower_list* *head_borrower_list,struct request_queue* *head_request_queue,struct book_DB *root)
 {
-    struct borrower_list *temp=(struct borrower_list* ) malloc(sizeof(struct book_list*));
+    struct borrower_list *temp=(struct borrower_list* ) malloc(sizeof(struct borrower_list*));
     printf("\n Enter the name of the student\n");
     scanf("%s",&temp->Name_of_the_student);
     printf("\n Enter the title of the book \n");
     scanf("%s",&temp->title_of_the_book);
-    if(isBook_available(temp->title_of_the_book,head_book_list)==1)
+    int id=idfromTitle(temp->title_of_the_book,root);
+    for(int i=0;i<3;i++)
+    {
+      temp->date_of_issue[i]=0;
+      temp->date_of_return[i]=0;
+    }
+    temp->next=NULL;
+    temp->prev=NULL;
+  if(id>0)
     {
         if(no_bo_list_by_name(temp->Name_of_the_student,*head_borrower_list)>=3)
         {
             printf("\n You've already borrowed 3 or more books,so we can't issue you another book.\n");
-            printf("\n Do you want to still request it? we can issue the book if you,ve returned previous books.\n");
+            printf("\n Do you want to still request it? we can issue the book if you've returned previous books.\n");
             printf("\nPlease enter 1 if this is the case,otherwise 0.\n thank you\n");
             int flag;
             scanf("%d",&flag);
@@ -493,17 +542,17 @@ void insert_borrower_list(struct borrower_list* *head_borrower_list,struct reque
             {
                 insert_request_queue(head_request_queue);
             }
+            return;
         }
-        else
-        {
+        //else
+        //{
             printf("\n Enter the present date\n Note that the format should be dd mm yyyy\n");
             int i;
             for(i=0;i<3;i++)
             {
                 scanf("%d",&temp->date_of_issue[i]);
             }
-            struct borrower_list *t=(struct borrower_list* ) malloc(sizeof(struct borrower_list*));
-            t=*head_borrower_list;
+            struct borrower_list *t=*head_borrower_list;
             if(*head_borrower_list==NULL)
             {
                 *head_borrower_list=temp; 
@@ -518,41 +567,43 @@ void insert_borrower_list(struct borrower_list* *head_borrower_list,struct reque
                 temp->prev=t;
                 temp->next=NULL;
             }
-            struct book_list *r=head_book_list;
-            while(r!=NULL)
-            {
-                if(strcmp(r->Title,temp->title_of_the_book)==0)
-                {
-                    r->number_of_copies_issued+=1;
-                    r->number_of_copies_available-=1;
-                    break;
-                }
-                r=r->next;
-            }
-        }
+            
+           bookIssued(id,root);
+        //}
     }
     else
+     {
+         printf("\n The given book is not available right now. \n");
+         printf("\n Do you want to request it so that it will be issued to you whenever we have stock? \nplease enter one if this is the case ,otherwise zero.\n Thank you.\n");
+         int flag;
+         scanf("%d",&flag);
+         if(flag==1)
+         {
+             insert_request_queue(head_request_queue);
+         }
+         else
+         {
+             return;
+         }
+     }
+    if(*head_borrower_list!=NULL)
     {
-        printf("\n The given book is not available right now. \n");
-        printf("\n Do you want to request it so that it will be issued to you whenever we have stock? \nplease enter one if this is the case ,otherwise zero.\n Thank you.\n");
-        int flag;
-        scanf("%d",&flag);
-        if(flag==1)
-        {
-            insert_request_queue(head_request_queue);
-        }
-        else
-        {
-            return;
-        }
+     struct borrower_list *c=*head_borrower_list;
+    while(c!=NULL)
+    {
+        printf("\n %s\n",c->Name_of_the_student);
+        c=c->next;
     }
+    }
+    printf("\n success \n");
 }
-void return_book(struct borrower_list* *head_borrower_list,struct book_list* *head_book_list)
+
+void return_book(struct borrower_list* *head_borrower_list,struct book_DB *root)
 {
     printf("\n enter your name\n");
     char arr_name[50];
      scanf("%s",&arr_name);
-    printf("\n enter the name of book you want to return");
+    printf("\n enter the name of book you want to return\n");
     char arr_title[50];
     scanf("%s",&arr_title);
     struct borrower_list *temp=*head_borrower_list;
@@ -560,154 +611,77 @@ void return_book(struct borrower_list* *head_borrower_list,struct book_list* *he
     {
         if(strcmp(temp->Name_of_the_student,arr_name)==0 && strcmp(temp->title_of_the_book,arr_title)==0)
         {
-            make_available(temp->title_of_the_book,head_book_list);
-            printf("\n enter the present date");
+            int a=idfromTitle(temp->title_of_the_book,root);
+            make_available(a,root);
+            printf("\n enter the present date\n");
             int i;
             for(i=0;i<3;i++)
             {
                 scanf("%d",&temp->date_of_return[i]);
             }
+            return;
         }
         temp=temp->next;
     }
 }
-/***************************************************************************************/
 
-
-/*****************************************************************************************/
 //supporting functions
-int book_list_by_name(char arr[50],struct request_queue *head_request_queue)
-{
-    if(head_request_queue==NULL)
-    {
-        return 0;
-    }
-    struct request_queue *temp=head_request_queue;
-    int count=0;
-    while(temp!=NULL)
-    {
-        if(strcmp(temp->Name_of_the_student,arr)==0)
-        {
-            count++;
-        }
-        temp=temp->next;
-    }
-    return count;
-}
-
-int no_bo_list_by_name(char arr[50],struct borrower_list *head_borrower_list)
-{
-    if(head_borrower_list==NULL)
-    {
-        return 0;
-    }
-   struct borrower_list *temp=head_borrower_list;
-    int count=0;
-    while(temp!=NULL)
-    {
-        if(strcmp(temp->Name_of_the_student,arr)==0)
-        {
-            count++;
-        }
-        temp=temp->next;
-    }
-    return count;
-}
-
-int no_re_queue(char arr[50],struct request_queue *head_request_queue)
-{    
-    struct request_queue *temp=head_request_queue;
-    int count=0;
-    while(temp!=NULL)
-    {   
-        if(strcmp(temp->title_of_the_book_asking_for,arr)==0)
-        {
-            count++;
-        }
-        temp=temp->next;
-    }      
-    return count;
-}
-
-//number of occurances in borrower_list
 int no_bo_list(char arr[50],struct borrower_list *head_borrower_list)
 {
-    struct borrower_list *temp=head_borrower_list;
+  printf("\n c \n");
+    struct borrower_list *temp=(struct borrower_list* ) malloc(sizeof(struct borrower_list*));
+    temp=head_borrower_list;
+    printf("\n d \n");
     int count=0;
     while(temp!=NULL)
     {
-        if(strcmp(temp->title_of_the_book,arr)==0)
-        {   
+      printf("\n e \n");
+        if(strcmp(temp->Name_of_the_student,arr)==0)
+         {
             count++;
-        }   
+            printf("\n f \n");
+        }
+        /*else
+        {
+          printf("\n g \n");
+            continue;
+        }*/
         temp=temp->next;
-    }       
+    }
+    printf("\n h \n");
     return count;
 }
 
-void make_available(char arr[50],struct book_list* *head_book_list)
+int count_request(char arr_name[50],char arr_title[50],struct request_queue *head_request_queue)
 {
-    struct book_list *temp=*head_book_list;
-    while(temp!=NULL)
-    {
-        if(strcmp(temp->Title,arr)==0)
-        {
-            temp->number_of_copies_issued-=1;
-            temp->number_of_copies_available+=1;
-            break;
-        }
-    }
-}
-
-void print_book_list(struct book_list *head_book_list)
-{
-  struct book_list *temp=head_book_list;
-   while(temp!=NULL)
-   { 
-       printf("\n");
-       printf("%s",temp->Title);
-       printf(" ");
-       printf("%s",temp->author);
-       printf(" ");
-       printf("%s",temp->subject);
-       printf(" ");
-       printf("available: %d ",temp->number_of_copies_available);
-       printf("issued: %d ",temp->number_of_copies_issued);
-       printf("\n");
-        temp=temp->next;
-    } 
-}
-// function to print the request_queue
-void print_request_queue(struct request_queue *head_request_queue)
-{
-    printf("\n request queue:\n");
+  printf("\n h \n");
     struct request_queue *temp=head_request_queue;
-    while(temp!=NULL)
+    int count=0;
+    while(strcmp(temp->Name_of_the_student,arr_name)==0 && strcmp(temp->title_of_the_book_asking_for,arr_title)==0)
     {
-        printf("\n");
-        printf("%s",temp->Name_of_the_student);
-        printf(" ");
-        printf("%s",temp->title_of_the_book_asking_for);
-        printf("\n");
+      printf("\n i \n");
+        if(strcmp(temp->Name_of_the_student,arr_name)==0)
+        {
+            count++;
+        }
         temp=temp->next;
     }
-}
-//function to print borrower_list
-void print_borrower_list(struct borrower_list *head_borrower_list)
-{
-    printf("\n Borrower list:\n");
-    struct borrower_list *temp=head_borrower_list;
-    while(temp!=NULL)
-    {
-       printf("\n");
-        printf("\n %s \n",temp->Name_of_the_student);
-        printf(" ");
-        printf("\n %s \n",temp->title_of_the_book);
-        printf("\n");
-        temp=temp->next;
-    }
+    printf("\n j \n");
+    return count;
 }
 
+
+int totalCopies(struct book_DB *root)
+{
+  if(root==NULL)
+  {
+    return 0;
+  }
+  a_3=a_3+root->number_of_copies_available;
+  totalCopies(root->left);
+  totalCopies(root->right);
+  return a_3;
+}
 int no_of_days(int d1[3],int d2[3])
 {
     if(d1[2]==d2[2])
@@ -733,70 +707,62 @@ int no_of_days(int d1[3],int d2[3])
         return 100;
     }
 }
-//supporting function
-int isDefaulter(char arr[50],struct borrower_list *head_borrower_list)
-{
-    struct borrower_list *temp1=head_borrower_list;
-    while(temp1!=NULL)
-    {
-        if(strcmp(temp1->Name_of_the_student,arr)==0)
-        {
-            if(temp1->date_of_return[0]=='\0')
-            {
-                printf("\n enter the present date");
-                int date[3];
-                int i;
-                for(i=0;i<3;i++)
-                {
-                    scanf("%d",&date[i]);
-                }
-                int a=no_of_days(temp1->date_of_issue,date);
-                if(a<15)
-                {
-                    return 1;
-                }
-            }
-            else
-            {
-                int b=no_of_days(temp1->date_of_issue,temp1->date_of_return);
-                if(b<15)
-                {
-                    return 1;
-                }
-            }
-        }
-        temp1=temp1->next;
-    }
-    return 0;
-}
 
-int isBook_available(char arr[50],struct book_list *head_book_list)
+int isBook_available(char arr[50],struct book_DB *root,int flag)
 {
-   struct book_list *temp=head_book_list;
-    while(temp!=NULL)
+  if(root==NULL)
+  {
+    return 0;
+  }
+    if(root!=NULL && flag==0)
     {
-        if(strcmp(temp->Title,arr)==0)
+        if(strcmp(root->Title,arr)==0)
         {
-            if(temp->number_of_copies_available>0)
+            if(root->number_of_copies_available>0)
             {
+                flag=1;
                 return 1;
             }
-        }
-        temp=temp->next;
+        }  
     }
-    return 0;
+    flag=isBook_available(arr,root->left,flag);
+    if(flag==0)
+    {
+        flag=isBook_available(arr,root->right,flag);
+    }
+    if(flag==1)
+    {
+      return 1;
+    }
+    else
+    {
+      return 0;
+    }
 }
 
-int willget_theBook(char arr[50],struct borrower_list *head_borrower_list)
+int no_re_queue(char arr[50],struct request_queue *head_request_queue)
+{    
+    struct request_queue *temp=head_request_queue;
+    int count=0;
+    while(temp!=NULL)
+    {   
+        if(strcmp(temp->title_of_the_book_asking_for,arr)==0)
+        {
+            count++;
+        }
+        temp=temp->next;
+    }      
+    return count;
+}
+int no_list(char arr[50],struct borrower_list *head_borrower_list)
 {
-    struct borrower_list *temp=(struct borrower_list* ) malloc(sizeof(struct borrower_list*));
-    temp=head_borrower_list;
+    struct borrower_list *temp=head_borrower_list;
     int count=0;
     while(temp!=NULL)
     {
-        if(strcmp(temp->Name_of_the_student,arr)==0)
+        if(strcmp(temp->title_of_the_book,arr)==0)
          {
-            count++;
+            count++; 
         }
         else
         {
@@ -806,14 +772,64 @@ int willget_theBook(char arr[50],struct borrower_list *head_borrower_list)
     }
     return count;
 }
-
-int count_request(char arr_name[50],char arr_title[50],struct request_queue *head_request_queue)
+void printInorder(struct book_DB *r) //  (Left, current node, Right)
 {
-    struct request_queue *temp=head_request_queue;
-    int count=0;
-    while(strcmp(temp->Name_of_the_student,arr_name)==0 && strcmp(temp->title_of_the_book_asking_for,arr_title)==0)
+    if (r == NULL)
+      return;
+    printInorder(r -> left);
+    printf("\n%s   %d\n",r->Title,r->number_of_copies_available);
+    printInorder(r -> right);
+}
+
+int idfromTitle(char title[50],struct book_DB *root)
+{
+  if(root==NULL)
+  {
+    return 0;
+  }
+  if(strcmp(root->Title,title)==0)
+  {
+    return root->book_id;
+  }
+  else
+  {
+    int a= idfromTitle(title,root->left);
+    if(a==0)
     {
-        if(strcmp(temp->Name_of_the_student,arr_name)==0)
+      return idfromTitle(title,root->right);
+    }
+    return a;
+  }
+}
+
+void bookIssued(int id,struct book_DB *root)
+{
+  if(root->book_id==id)
+  {
+    root->number_of_copies_available-=1;
+    root->number_of_copies_issued+=1;
+  }
+  else if(root->book_id>id)
+  {
+    bookIssued(id,root->left);
+  }
+  else
+  {
+    bookIssued(id,root->right);
+  }
+}
+
+int no_bo_list_by_name(char arr[50],struct borrower_list *head_borrower_list)
+{
+    if(head_borrower_list==NULL)
+    {
+        return 0;
+    }
+   struct borrower_list *temp=head_borrower_list;
+    int count=0;
+    while(temp!=NULL)
+    {
+        if(strcmp(temp->Name_of_the_student,arr)==0)
         {
             count++;
         }
@@ -821,42 +837,24 @@ int count_request(char arr_name[50],char arr_title[50],struct request_queue *hea
     }
     return count;
 }
-struct book_list *split(struct book_list *head)
+
+void make_available(int id,struct book_DB *root)
 {
-    struct book_list *fast = head,*slow = head;
-    while (fast->next && fast->next->next)
+    if(root==NULL)
     {
-        fast = fast->next->next;
-        slow = slow->next;
+        return;
     }
-    struct book_list *temp = slow->next;
-    slow->next = NULL;
-    return temp;
+    if(root->book_id==id)
+    {
+      root->number_of_copies_available+=1;
+      root->number_of_copies_issued-=1;
+    }
+    else if(root->book_id>id)
+    {
+      make_available(id,root->left);
+    }
+    else
+    {
+      make_available(id,root->right);
+    }
 }
-struct book_list *merge(struct book_list *first, struct book_list *second)
-{
-	// If first linked list is empty
-	if (!first)
-		return second;
-
-	// If second linked list is empty
-	if (!second)
-		return first;
-
-	// Pick the smaller value
-	if (first->number_of_copies_available > second->number_of_copies_available)
-	{
-		first->next = merge(first->next,second);
-		first->next->prev = first;
-		first->prev = NULL;
-		return first;
-	}
-	else
-	{
-		second->next = merge(first,second->next);
-		second->next->prev = second;
-		second->prev = NULL;
-		return second;
-	}
-}
-/*******************************************************************************************************************/
